@@ -86,7 +86,7 @@ stateDiagram-v2
 
 ## Architecture
 
-```meremaid
+```mermaid
 flowchart TB
     subgraph "Raspberry Pi"
         MQTT[Serveur MQTT Mosquitto]
