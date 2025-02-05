@@ -43,5 +43,16 @@ flowchart TD
         NoPresence[Pas de présence depuis X minutes] --> TurnOffLights[Éteindre lumières]
         TurnOffLights --> AdjustBlinds[Ajuster volets selon l'heure]
     end
-
     ```
+
+
+## materiel utilisé
+- ESP32
+- Capteur de luminosité
+- Capteur de présence
+- Servomoteur
+- LED
+- Résistance
+- Breadboard
+- Fils de connexion
+- Alimentation 5V
