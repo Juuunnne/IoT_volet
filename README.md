@@ -55,4 +55,10 @@ flowchart TD
         NoPresence[Pas de présence depuis X minutes] --> TurnOffLights[Éteindre lumières]
         TurnOffLights --> AdjustBlinds[Ajuster volets selon l'heure]
     end
-    ```
+```
+
+## équipe
+
+- [Jun](@Juuunnne)
+- [Vincent](@Vincent-Altmann)
+- [Alexandre](@nnaova)
