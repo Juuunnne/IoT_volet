@@ -61,4 +61,4 @@ flowchart TD
 
 - [Jun](https://github.com/Juuunnne)
 - [Vincent](https://github.com/Vincent-Altmann)
-- [Alexandre]([@](https://github.com/)nnaova)
+- [Alexandre](https://github.com/nnaova)
