@@ -10,6 +10,7 @@ présence humaine.
 
 ## Schéma logique
 
+```mermaid
 flowchart TD
     Start[Début] --> Presence{Détection de présence?}
     
@@ -42,3 +43,5 @@ flowchart TD
         NoPresence[Pas de présence depuis X minutes] --> TurnOffLights[Éteindre lumières]
         TurnOffLights --> AdjustBlinds[Ajuster volets selon l'heure]
     end
+
+    ```
