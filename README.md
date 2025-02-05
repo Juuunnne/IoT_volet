@@ -8,6 +8,18 @@ Développer un système intelligent qui ajuste automatiquement l’ouverture des
 roulants et l’allumage des lumières d’une salle en fonction des conditions ambiantes et de la
 présence humaine.
 
+## materiel utilisé
+
+- ESP32
+- Capteur de luminosité
+- Capteur de présence
+- Servomoteur
+- LED
+- Résistance
+- Breadboard
+- Fils de connexion
+- Alimentation 5V
+
 ## Schéma logique
 
 ```mermaid
@@ -44,15 +56,3 @@ flowchart TD
         TurnOffLights --> AdjustBlinds[Ajuster volets selon l'heure]
     end
     ```
-
-
-## materiel utilisé
-- ESP32
-- Capteur de luminosité
-- Capteur de présence
-- Servomoteur
-- LED
-- Résistance
-- Breadboard
-- Fils de connexion
-- Alimentation 5V
