@@ -126,6 +126,69 @@ flowchart TB
     style ESP32 fill:#bfb,stroke:#333,stroke-width:4px
 ```
 
+## Diagramme d'état
+
+```mermaid
+stateDiagram-v2
+    direction TB
+    [*] --> Idle : Initialisation
+
+    state Idle {
+        direction LR
+        [*] --> WaitingCommands : Système prêt
+        WaitingCommands --> CheckConditions : Événement détecté
+    }
+
+    state Read {
+        direction TB
+        ReadSensors --> ProcessData
+        ProcessData --> DecisionMaking
+    }
+
+    state "Action Controller" as ActionController {
+        direction LR
+        ExecuteCommand --> UpdateStatus
+        UpdateStatus --> PublishMQTT
+    }
+
+    state Error {
+        direction TB
+        [*] --> DiagnosticMode
+        DiagnosticMode --> AttemptRecovery
+        AttemptRecovery --> [*] : Échec
+        AttemptRecovery --> Idle : Succès
+    }
+
+    Idle --> Read : Déclenchement lecture
+    Read --> ActionController : Nécessité d'action
+    Read --> Idle : Pas d'action requise
+
+    ActionController --> Idle : Action terminée
+    ActionController --> Error : Erreur de commande
+
+    Error --> Idle : Résolution
+
+    note right of Idle
+        État de veille
+        Attente d'événements
+    end note
+
+    note left of Read
+        Lecture et analyse
+        des capteurs
+    end note
+
+    note right of ActionController
+        Exécution des 
+        commandes
+    end note
+
+    note left of Error
+        Gestion des 
+        dysfonctionnements
+    end note
+```
+
 ## équipe
 
 - [Jun](https://github.com/Juuunnne)
