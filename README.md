@@ -59,6 +59,6 @@ flowchart TD
 
 ## équipe
 
-- [Jun](@Juuunnne)
-- [Vincent](@Vincent-Altmann)
-- [Alexandre](@nnaova)
+- [Jun](https://github.com/Juuunnne)
+- [Vincent](https://github.com/Vincent-Altmann)
+- [Alexandre]([@](https://github.com/)nnaova)
