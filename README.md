@@ -23,38 +23,65 @@ présence humaine.
 ## Schéma logique
 
 ```mermaid
-flowchart TD
-    Start[Début] --> Presence{Détection de présence?}
+stateDiagram-v2
+    direction TB
+    [*] --> InitState : Démarrage système
     
-    Presence -->|Non| CheckTime{Vérifier l'heure}
-    CheckTime -->|Jour| DefaultDay[Position jour par défaut]
-    CheckTime -->|Nuit| DefaultNight[Position nuit par défaut]
+    state InitState {
+        [*] --> ConnectWiFi : Connexion réseau
+        ConnectWiFi --> ConnectMQTT : Connexion MQTT
+        ConnectMQTT --> WaitCommands : Attente commandes
+    }
     
-    Presence -->|Oui| B{Vérifier niveau de luminosité}
-    B -->|Luminosité < Seuil min| C{Vérifier position volets}
-    B -->|Luminosité >= Seuil min| D[Maintenir état actuel]
+    state WaitCommands {
+        direction LR
+        AutoMode --> ManualMode : Ordre MQTT
+        ManualMode --> AutoMode : Ordre MQTT
+    }
     
-    C -->|Volets fermés| E[Ouvrir volets graduellement]
-    E --> F{Vérifier nouvelle luminosité}
-    F -->|Suffisante| G[Maintenir volets ouverts]
-    F -->|Insuffisante| H[Allumer lumière artificielle]
+    state AutoMode {
+        direction TB
+        [*] --> CheckPresence
+        CheckPresence --> CheckLuminosity : Présence détectée
+        CheckPresence --> DefaultState : Pas de présence
+        
+        CheckLuminosity --> AdjustBlinds : Luminosité < Seuil
+        CheckLuminosity --> MaintainState : Luminosité OK
+        
+        AdjustBlinds --> CheckNewLuminosity
+        CheckNewLuminosity --> AllumageLight : Luminosité insuffisante
+        CheckNewLuminosity --> MaintainState : Luminosité suffisante
+    }
     
-    C -->|Volets partiellement ouverts| I[Ouvrir volets complètement]
-    I --> J{Vérifier nouvelle luminosité}
-    J -->|Suffisante| K[Maintenir volets ouverts]
-    J -->|Insuffisante| L[Allumer lumière artificielle]
+    state ManualMode {
+        direction LR
+        [*] --> WaitMQTTCommands
+        WaitMQTTCommands --> BlindControl : Commande Volets
+        WaitMQTTCommands --> LightControl : Commande Lumière
+    }
     
-    C -->|Volets déjà ouverts| M[Allumer lumière artificielle]
+    state BlindControl {
+        OpenBlinds
+        CloseBlinds
+        StopBlinds
+        PartialBlinds
+    }
     
-    subgraph "Conditions de sécurité prioritaires"
-        N{Détection vent fort?} -->|Oui| O[Fermer volets]
-        P{Détection pluie?} -->|Oui| O
-    end
+    state LightControl {
+        TurnOnLight
+        TurnOffLight
+        DimLight
+    }
     
-    subgraph "Gestion absence prolongée"
-        NoPresence[Pas de présence depuis X minutes] --> TurnOffLights[Éteindre lumières]
-        TurnOffLights --> AdjustBlinds[Ajuster volets selon l'heure]
-    end
+    state PublishState {
+        SendCurrentStatus
+        SendSensorData
+    }
+    
+    note left of PublishState
+      Remontée régulière 
+      des informations
+    end note
 ```
 
 ## équipe
