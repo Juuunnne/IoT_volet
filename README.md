@@ -84,6 +84,48 @@ stateDiagram-v2
     end note
 ```
 
+## Architecture
+
+```meremaid
+flowchart TB
+    subgraph "Raspberry Pi"
+        MQTT[Serveur MQTT Mosquitto]
+        Database[Base de données]
+        WebServer[Serveur Web]
+    end
+
+    subgraph "ESP32"
+        Sensors[Capteurs]
+        Relays[Relais volets/lumière]
+        MCU[Microcontrôleur]
+    end
+
+    subgraph "Application Mobile"
+        MobileApp[Interface Utilisateur]
+        MobileControl[Contrôle]
+        MobileDashboard[Tableau de bord]
+    end
+
+    Sensors --> |Données| MCU
+    MCU --> |Publier données| MQTT
+    MQTT --> |Abonner topics| MCU
+
+    MobileApp --> |Envoyer commandes| MQTT
+    MQTT --> |Transmettre commandes| MCU
+
+    MQTT --> |Stocker données| Database
+    MQTT --> |Log événements| WebServer
+
+    MCU --> |Contrôler| Relays
+
+    MobileApp <--> |Synchronisation| WebServer
+    WebServer <--> |Stocker historique| Database
+
+    style MQTT fill:#f9f,stroke:#333,stroke-width:4px
+    style MobileApp fill:#bbf,stroke:#333,stroke-width:4px
+    style ESP32 fill:#bfb,stroke:#333,stroke-width:4px
+```
+
 ## équipe
 
 - [Jun](https://github.com/Juuunnne)
