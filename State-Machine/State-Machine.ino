@@ -21,9 +21,9 @@ int pinStateCurrent = LOW;
 int pinStatePrevious= LOW;
 
 // Configuration MQTT
-const char* ssid = "VotreSSID";
-const char* password = "VotreMotDePasse";
-const char* mqttServer = "broker.hivemq.com";
+const char* ssid = "俊";
+const char* password = "12345678";
+const char* mqttServer = "172.20.10.2"; //"broker.hivemq.com";
 const int mqttPort = 1883;
 const char* mqttTopic = "arduino/data";
 
@@ -53,9 +53,9 @@ void setup() {
   // Initializing components
   initSensors();
   initActuators();
-  initMQTT();
+  //initMQTT();
 
-  if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
+  if (lightMeter.begin()) {
     Serial.println("Capteur BH1750 initialisé");
   } else {
     Serial.println("Erreur : Impossible d'initialiser le capteur BH1750");
@@ -65,10 +65,11 @@ void setup() {
 void loop() {
   switch (currentState) {
     case IDLE:
-      if (!client.connected()) {
+      /*if (!client.connected()) {
         reconnectMQTT();
-      }
+      }*/
       handleIdleState();
+      delay(1000);
       break;
 
     case ACTUATOR_CONTROL:
@@ -121,7 +122,8 @@ void initSensors() {
 void initActuators() {
   // Code pour initialiser les actionneurs
   pinMode(PIN_PIR, INPUT);
-  sg90.attach(PIN_MOTOR); // Broche du servo moteur
+  sg90.setPeriodHertz(50);
+  sg90.attach(PIN_MOTOR, 500, 2400); // Broche du servo moteur
   pinMode(greenpin, OUTPUT);
 }
 
@@ -166,7 +168,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Utility functions
 bool conditionToRead(SensorData data, bool trigger) {
   bool actionRequire = false;
-  if (data.motionDetected && data.lightLevel < 10) actionRequire = true;
+  if (data.motionDetected && data.lightLevel > 50) actionRequire = true;
   // Condition for control actuator
   return (actionRequire || trigger);
 }
@@ -175,7 +177,7 @@ SensorData readSensors() {
   // Code de lecture des capteurs
   SensorData data;
   // Lecture du capteur de lumière BH1750
-  if (lightMeter.measurementReady){
+  if (lightMeter.measurementReady()){
     data.lightLevel = lightMeter.readLightLevel();
     Serial.print("Niveau de lumière : ");
     Serial.print(data.lightLevel);
@@ -202,16 +204,21 @@ void controlActuators(SensorData data) {
   Serial.println("Contrôle des actionneurs...");
   
   // Exemple de contrôle du servo moteur
-  sg90.write(90); // Tourne le servo à 90°
-  delay(1000);
-  sg90.write(0); // Retour à 0°
-  
-  if(data.lightLevel < 0){
-    // Exemple de contrôle de la LED
-    digitalWrite(greenpin, HIGH); // Allume la LED
-    delay(500);
-    digitalWrite(greenpin, LOW); // Éteint la LED
+  for (int pos = 0; pos <= 180; pos += 1) {
+      sg90.write(pos);
+      delay(10);
   }
+  /*sg90.write(90); // Tourne le servo à 90°
+  delay(1000);
+  sg90.write(0); // Retour à 0°*/
+  
+  Serial.println("Moteur actionné !");
+  //if(data.lightLevel < 0){
+  // Exemple de contrôle de la LED
+  digitalWrite(greenpin, HIGH); // Allume la LED
+  delay(500);
+  digitalWrite(greenpin, LOW); // Éteint la LED
+  //}
 }
 
 void resetSystem() {
