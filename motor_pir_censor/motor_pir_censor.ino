@@ -1,10 +1,16 @@
 #include <ESP32Servo.h>
+#include <BH1750.h>
+#include <Wire.h>
 
-const int PIN_MOTOR = 4;
-const int PIN_PIR   = 3;
+BH1750 lightMeter;
+
+const int PIN_MOTOR = 1;
+const int PIN_PIR   = 2;
+int greenpin = 3; // select the pin for the green LED
 
 Servo sg90;
 bool isRunning = true;  // Flag to control motor operation
+int val;
 
 //PIR Censor states
 int pinStateCurrent = LOW;
@@ -15,12 +21,34 @@ void setup() {
   pinMode(PIN_PIR, INPUT);
   sg90.setPeriodHertz(50);
   sg90.attach(PIN_MOTOR, 500, 2400);
+  pinMode(greenpin, OUTPUT);
   Serial.println("Servo control ready. Send any character to stop/start the motor.");
+  // Initialize the I2C bus (BH1750 library doesn't do this automatically)
+  Wire.begin();
+  // On esp8266 you can select SCL and SDA pins using Wire.begin(D4, D3);
+  // For Wemos / Lolin D1 Mini Pro and the Ambient Light shield use Wire.begin(D2, D1);
+  lightMeter.begin();
+  Serial.println(F("BH1750 Test begin"));
 }
 
 void loop() {
   pinStatePrevious = pinStateCurrent; // store old state
   pinStateCurrent = digitalRead(PIN_PIR);
+  //TEST LUMIERE + LED
+  float lux = lightMeter.readLightLevel();
+  Serial.print("Light: ");
+  Serial.print(lux);
+  Serial.println(" lx");
+  for(val = 255; val > 0; val--){
+    analogWrite(greenpin, 128 - val);
+    Serial.println(val, DEC);
+  }
+  for(val = 0; val < 255; val++){
+    analogWrite(greenpin, 128 - val);
+    Serial.println(val, DEC);
+  }
+  //FIN TEST
+  
   // Check for serial input
   if (Serial.available()) {
     String message = Serial.readStringUntil('\n');  // Clear the serial buffer
