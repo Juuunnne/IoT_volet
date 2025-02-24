@@ -97,7 +97,7 @@ stateDiagram-v2
         - États des dispositifs
         - Modes de fonctionnement
         - Données des capteurs
-    end **note**
+    end note
 ```
 
 ## Architecture
