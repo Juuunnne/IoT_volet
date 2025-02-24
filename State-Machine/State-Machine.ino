@@ -8,7 +8,9 @@ BH1750 lightMeter;
 
 const int PIN_MOTOR = 1;
 const int PIN_PIR   = 2;
-int greenpin = 3; // select the pin for the green LEDl
+const int greenpin = 3; // select the pin for the green LEDl
+const int sdaPin = 5;
+const int sclPin = 6;
 
 Servo sg90;
 bool isRunning = true;  // Flag to control motor operation
@@ -81,7 +83,7 @@ void loop() {
 void handleIdleState() {
   Serial.println("État : IDLE");
   data = readSensors();
-  trigger = read();
+  //trigger = read();
   // Transition logic
   if (conditionToRead(data, trigger)) {
     currentState = ACTUATOR_CONTROL;
@@ -91,7 +93,7 @@ void handleIdleState() {
 void handleActuatorControlState() {
   Serial.println("État : ACTUATOR_CONTROL");
   // Control actuators based on sensor data
-  controlActuators();
+  controlActuators(data);
   // Return to IDLE state
   currentState = IDLE;
 }
@@ -114,7 +116,7 @@ void initSensors() {
 void initActuators() {
   // Code pour initialiser les actionneurs
   pinMode(PIN_PIR, INPUT);
-  servoMotor.attach(1); // Broche du servo moteur
+  sg90.attach(PIN_MOTOR); // Broche du servo moteur
   pinMode(greenpin, OUTPUT);
 }
 
@@ -157,9 +159,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 // Utility functions
-bool conditionToRead(sensorData data, bool trigger) {
+bool conditionToRead(SensorData data, bool trigger) {
   bool actionRequire = false;
-  if () actionRequire = true;
+  if (data.motionDetected && data.lightLevel < 10) actionRequire = true;
   // Condition for control actuator
   return (actionRequire || trigger);
 }
@@ -174,33 +176,35 @@ SensorData readSensors() {
   Serial.println(" lx");
   
   // Lecture du capteur de mouvement PIR
-  data.motionDetected = digitalRead(pirPin);
+  data.motionDetected = digitalRead(PIN_PIR);
   Serial.print("Mouvement détecté : ");
   Serial.println(data.motionDetected ? "Oui" : "Non");
   
   return data;
 }
 
-bool read(){
+/*bool read(){
   // Code pour écouter
   client.loop();
   if () return true;
   else return false;
-}
+}*/
 
-void controlActuators() {
+void controlActuators(SensorData data) {
   // Code de contrôle des actionneurs
   Serial.println("Contrôle des actionneurs...");
   
   // Exemple de contrôle du servo moteur
-  servoMotor.write(90); // Tourne le servo à 90°
+  sg90.write(90); // Tourne le servo à 90°
   delay(1000);
-  servoMotor.write(0); // Retour à 0°
+  sg90.write(0); // Retour à 0°
   
-  // Exemple de contrôle de la LED
-  digitalWrite(greenpin, HIGH); // Allume la LED
-  delay(500);
-  digitalWrite(greenpin, LOW); // Éteint la LED
+  if(data.lightLevel < 0){
+    // Exemple de contrôle de la LED
+    digitalWrite(greenpin, HIGH); // Allume la LED
+    delay(500);
+    digitalWrite(greenpin, LOW); // Éteint la LED
+  }
 }
 
 void resetSystem() {
@@ -208,7 +212,7 @@ void resetSystem() {
   Serial.println("Réinitialisation du système...");
   
   // Réinitialiser les actionneurs
-  servoMotor.write(0); // Remettre le servo en position initiale
+  sg90.write(0); // Remettre le servo en position initiale
   digitalWrite(greenpin, LOW); // Éteindre la LED
   
   // Vérifier les capteurs
