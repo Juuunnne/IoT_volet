@@ -4,13 +4,13 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-BH1750 lightMeter;
+BH1750 lightMeter(0x23);
 
 const int PIN_MOTOR = 1;
 const int PIN_PIR   = 2;
 const int greenpin = 3; // select the pin for the green LEDl
-const int sdaPin = 5;
-const int sclPin = 6;
+const int SDA_Pin = 5;
+const int SCL_Pin = 6;
 
 Servo sg90;
 bool isRunning = true;  // Flag to control motor operation
@@ -54,6 +54,12 @@ void setup() {
   initSensors();
   initActuators();
   initMQTT();
+
+  if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
+    Serial.println("Capteur BH1750 initialisé");
+  } else {
+    Serial.println("Erreur : Impossible d'initialiser le capteur BH1750");
+  }
 }
 
 void loop() {
@@ -110,7 +116,6 @@ void handleErrorState() {
 void initSensors() {
   // Code pour initialiser les capteurs
   Wire.begin();
-  lightMeter.begin();
 }
 
 void initActuators() {
@@ -170,10 +175,12 @@ SensorData readSensors() {
   // Code de lecture des capteurs
   SensorData data;
   // Lecture du capteur de lumière BH1750
-  data.lightLevel = lightMeter.readLightLevel();
-  Serial.print("Niveau de lumière : ");
-  Serial.print(data.lightLevel);
-  Serial.println(" lx");
+  if (lightMeter.measurementReady){
+    data.lightLevel = lightMeter.readLightLevel();
+    Serial.print("Niveau de lumière : ");
+    Serial.print(data.lightLevel);
+    Serial.println(" lx");
+  }
   
   // Lecture du capteur de mouvement PIR
   data.motionDetected = digitalRead(PIN_PIR);
